@@ -1,5 +1,6 @@
 package com.android.tu.circlelibrary;
 
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -7,6 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.SweepGradient;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -15,16 +18,22 @@ import android.view.View;
  */
 public class CirclePercentBar extends View{
 
+    private Context mContext;
+
     private int mArcColor;
     private int mArcWidth;
     private int mCenterTextColor;
     private int mCenterTextSize;
     private int mCircleRadius;
     private Paint arcPaint;
+    private Paint arcCirclePaint;
     private Paint centerTextPaint;
     private RectF arcRectF;
     private Rect textBoundRect;
     private float mCurData=0;
+    private int arcStartColor;
+    private int arcEndColor;
+    private Paint startCirclePaint;
 
     public CirclePercentBar(Context context) {
         this(context, null);
@@ -36,12 +45,17 @@ public class CirclePercentBar extends View{
 
     public CirclePercentBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mContext=context;
         TypedArray typedArray=context.obtainStyledAttributes(attrs,R.styleable.CirclePercentBar,defStyleAttr,0);
         mArcColor = typedArray.getColor(R.styleable.CirclePercentBar_arcColor,0xff0000);
         mArcWidth = typedArray.getDimensionPixelSize(R.styleable.CirclePercentBar_arcWidth, DisplayUtil.dp2px(context, 20));
         mCenterTextColor = typedArray.getColor(R.styleable.CirclePercentBar_centerTextColor, 0x0000ff);
         mCenterTextSize = typedArray.getDimensionPixelSize(R.styleable.CirclePercentBar_centerTextSize, DisplayUtil.dp2px(context, 20));
         mCircleRadius = typedArray.getDimensionPixelSize(R.styleable.CirclePercentBar_circleRadius, DisplayUtil.dp2px(context, 100));
+        arcStartColor = typedArray.getColor(R.styleable.CirclePercentBar_arcStartColor,
+                ContextCompat.getColor(mContext, R.color.colorStart));
+        arcEndColor = typedArray.getColor(R.styleable.CirclePercentBar_arcEndColor,
+                ContextCompat.getColor(mContext, R.color.colorEnd));
 
         typedArray.recycle();
 
@@ -50,6 +64,17 @@ public class CirclePercentBar extends View{
     }
 
     private void initPaint() {
+
+        startCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        startCirclePaint.setStyle(Paint.Style.FILL);
+        //startCirclePaint.setStrokeWidth(mArcWidth);
+        startCirclePaint.setColor(arcStartColor);
+
+        arcCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        arcCirclePaint.setStyle(Paint.Style.STROKE);
+        arcCirclePaint.setStrokeWidth(mArcWidth);
+        arcCirclePaint.setColor(ContextCompat.getColor(mContext,R.color.colorCirclebg));
+        arcCirclePaint.setStrokeCap(Paint.Cap.ROUND);
 
         arcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         arcPaint.setStyle(Paint.Style.STROKE);
@@ -95,11 +120,19 @@ public class CirclePercentBar extends View{
     @Override
     protected void onDraw(Canvas canvas) {
 
-        float a=getWidth();
+        canvas.rotate(-90, getWidth()/ 2, getHeight()/ 2);
 
         arcRectF.set(getWidth()/2-mCircleRadius+mArcWidth/2,getHeight()/2-mCircleRadius+mArcWidth/2
                 ,getWidth()/2+mCircleRadius-mArcWidth/2,getHeight()/2+mCircleRadius-mArcWidth/2);
-        canvas.drawArc(arcRectF,270,360* mCurData /100,false,arcPaint);
+
+
+        canvas.drawArc(arcRectF, 0,360,false,arcCirclePaint);
+
+        arcPaint.setShader(new SweepGradient(getWidth()/2,getHeight()/2,arcStartColor,arcEndColor));
+        canvas.drawArc(arcRectF, 0,360* mCurData /100,false,arcPaint);
+
+        canvas.rotate(90, getWidth()/ 2, getHeight()/ 2);
+        canvas.drawCircle(getWidth()/2,getHeight()/2-mCircleRadius+mArcWidth/2,mArcWidth/2,startCirclePaint);
 
         String data= String.valueOf(mCurData) +"%";
         centerTextPaint.getTextBounds(data,0,data.length(),textBoundRect);
@@ -107,7 +140,7 @@ public class CirclePercentBar extends View{
 
     }
 
-    public void setPercentData(float data){
+    public void setPercentData(float data, TimeInterpolator interpolator){
         ValueAnimator valueAnimator=ValueAnimator.ofFloat(mCurData,data);
         valueAnimator.setDuration((long) (Math.abs(mCurData-data)*30));
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -118,6 +151,7 @@ public class CirclePercentBar extends View{
                 invalidate();
             }
         });
+        valueAnimator.setInterpolator(interpolator);
         valueAnimator.start();
     }
 }

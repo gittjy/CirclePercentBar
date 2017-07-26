@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorCirclebg">#100000ff</color>
+    <color name="colorStart">#1212F6</color>
+    <color name="colorEnd">#F212C6</color>
+</resources>

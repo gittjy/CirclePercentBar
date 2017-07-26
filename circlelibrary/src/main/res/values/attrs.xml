@@ -6,5 +6,7 @@
         <attr name="centerTextColor" format="color"/>
         <attr name="centerTextSize" format="dimension"/>
         <attr name="circleRadius" format="dimension"/>
+        <attr name="arcStartColor" format="color"/>
+        <attr name="arcEndColor" format="color"/>
     </declare-styleable>
 </resources>

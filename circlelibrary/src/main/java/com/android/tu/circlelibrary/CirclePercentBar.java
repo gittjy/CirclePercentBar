@@ -31,6 +31,7 @@ public class CirclePercentBar extends View{
     private RectF arcRectF;
     private Rect textBoundRect;
     private float mCurData=0;
+    private String mSuffix="%";
     private int arcStartColor;
     private int arcEndColor;
     private Paint startCirclePaint;
@@ -134,13 +135,13 @@ public class CirclePercentBar extends View{
         canvas.rotate(90, getWidth()/ 2, getHeight()/ 2);
         canvas.drawCircle(getWidth()/2,getHeight()/2-mCircleRadius+mArcWidth/2,mArcWidth/2,startCirclePaint);
 
-        String data= String.valueOf(mCurData) +"%";
+        String data= String.valueOf(mCurData) + mSuffix;
         centerTextPaint.getTextBounds(data,0,data.length(),textBoundRect);
         canvas.drawText(data,getWidth()/2-textBoundRect.width()/2,getHeight()/2+textBoundRect.height()/2,centerTextPaint);
 
     }
 
-    public void setPercentData(float data, TimeInterpolator interpolator){
+    public void setPercentData(float data, String suffix, TimeInterpolator interpolator){
         ValueAnimator valueAnimator=ValueAnimator.ofFloat(mCurData,data);
         valueAnimator.setDuration((long) (Math.abs(mCurData-data)*30));
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {

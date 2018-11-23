@@ -141,7 +141,7 @@ public class CirclePercentBar extends View{
 
     }
 
-    public void setPercentData(float data, String suffix, TimeInterpolator interpolator){
+    public void setPercentData(float data, final String suffix, TimeInterpolator interpolator){
         ValueAnimator valueAnimator=ValueAnimator.ofFloat(mCurData,data);
         valueAnimator.setDuration((long) (Math.abs(mCurData-data)*30));
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -149,6 +149,7 @@ public class CirclePercentBar extends View{
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float value= (float) valueAnimator.getAnimatedValue();
                 mCurData=(float)(Math.round(value*10))/10;
+                mSuffix = suffix;
                 invalidate();
             }
         });
